@@ -1,0 +1,19 @@
+/_deps/
+# CMake build directories
+/CMakeCache.txt
+/CMakeFiles/
+/cmake_install.cmake
+/Makefile
+
+# CMake output directories
+/build/
+/out/
+/bin/
+/lib/
+/obj/
+
+# Visual Studio specific CMake files
+/CMakeUserPresets.json
+/vs/
+/_deps/
+.vs/
