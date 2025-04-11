@@ -15,6 +15,7 @@
 #include <tuple>
 #include <condition_variable>
 #include "encryption.h"
+#include <crow.h>
 
 typedef std::vector<unsigned char> request_body_type;
 
@@ -40,6 +41,10 @@ public:
         delete request_queues;
         delete responses;
         delete in_use_request_ids;
+    }
+
+    bool service_exists(const std::string& service) {
+        return request_queues->find(service) != request_queues->end();
     }
 
     bool readKey(const std::string& filename) {
@@ -71,7 +76,9 @@ public:
         io_context_.run();
     }
 
-    const request_body_type handle_request(const std::string & client_type, const request_body_type & out_packet) {
+    
+
+    const request_body_type handle_request(const std::string & client_type, request_body_type & out_packet) {
         long id = 0;
         {
             std::lock_guard<std::mutex> lock(queue_mutex);
@@ -106,6 +113,71 @@ public:
             in_use_request_ids->insert(id);
             return id;
         }
+    }
+
+    bool validate_api_key(const std::string& auth_token) {
+
+        crow::json::wvalue client_packet;
+
+        client_packet["service"] = "verify_API_key";
+        client_packet["data"] = crow::json::wvalue{
+            {"api_key", auth_token}
+        };
+
+        crow::json::rvalue json_body = handle_auth_request(client_packet);
+
+        if (json_body.has("success")) {
+            return json_body["success"].b();
+        }
+
+        throw std::runtime_error("Authorization response came back mangled.");
+    }
+
+    crow::json::rvalue register_account(
+        const std::string& email, const std::string& password, const std::string& re_password,
+        const std::string& first_name, const std::string& last_name, const std::string& DOB
+    ) {
+
+        crow::json::wvalue client_packet;
+
+        client_packet["service"] = "register";
+        client_packet["data"] = crow::json::wvalue{
+            {"email", email},
+            {"password", password},
+            {"re-password", re_password},
+            {"first_name", first_name},
+            {"last_name", last_name},
+            {"DOB", DOB}
+        };
+
+        crow::json::rvalue json_body = handle_auth_request(client_packet);
+
+        return json_body;
+    }
+
+    crow::json::rvalue login_account(
+        const std::string& email, const std::string& password
+    ) {
+
+        crow::json::wvalue client_packet;
+
+        client_packet["service"] = "login";
+        client_packet["data"] = crow::json::wvalue{
+            {"email", email},
+            {"password", password}
+        };
+
+        crow::json::rvalue json_body = handle_auth_request(client_packet);
+
+        return json_body;
+    }
+
+    crow::json::rvalue handle_auth_request(crow::json::wvalue payload) {
+        std::string json_str = payload.dump();
+        request_body_type in_vec(json_str.begin(), json_str.end());
+        request_body_type raw_response = this->handle_request("Auth", in_vec);
+        std::string successful_response_string(raw_response.begin(), raw_response.end());
+        return crow::json::load(successful_response_string);
     }
 
 public:

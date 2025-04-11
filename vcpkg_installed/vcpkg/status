@@ -1,0 +1,68 @@
+Package: vcpkg-cmake-config
+Version: 2024-05-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: f86aba10e97ba9166ba098ac26215b88f10d58871781ac71b62e76b5a26550bb
+Status: install ok installed
+
+Package: vcpkg-cmake
+Version: 2024-04-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: de34223ad271e85df7e66365691951dc227252489413bdf49142f57291e9cfa8
+Status: install ok installed
+
+Package: asio
+Version: 1.32.0
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: ca277a4837dcb881598f6c22400700a13617aea5319e13c18e2afea05eec6280
+Description: Asio is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ approach.
+Status: install ok installed
+
+Package: crow
+Version: 1.2.1.2
+Depends: asio, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: bc5f9c0bfab84540763c415e476fa5ecf40f54c807ea8a3235fce730aae6fab5
+Description: Very fast and easy to use C++ micro web framework
+Status: install ok installed
+
+Package: picojson
+Version: 1.3.0
+Port-Version: 3
+Architecture: x64-windows
+Multi-Arch: same
+Abi: e130c8b4a01f77bfae001f86bc1bfe32af37ec30668e40a015dba96871fcde6f
+Description: A header-file-only, JSON parser serializer in C++.
+Status: install ok installed
+
+Package: vcpkg-cmake-get-vars
+Version: 2024-09-22
+Depends: vcpkg-cmake
+Architecture: x64-windows
+Multi-Arch: same
+Abi: a4b9f5b828196ff59a82c7f66fbd329222bc23fd234473a18231f28a5cbe8972
+Status: install ok installed
+
+Package: openssl
+Version: 3.4.1
+Depends: vcpkg-cmake, vcpkg-cmake-config, vcpkg-cmake-get-vars
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 32293d345310ae9c8dd5d2a2c0668bd1258b1d8049269b89e0349b8b0ef84935
+Description: OpenSSL is an open source project that provides a robust, commercial-grade, and full-featured toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols. It is also a general-purpose cryptography library.
+Status: install ok installed
+
+Package: jwt-cpp
+Version: 0.7.0
+Port-Version: 1
+Depends: openssl, picojson, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 74c3837816567ac0122040a49c9ef499e387fae1360f844560517aac2b159f7f
+Description: A header only library for creating and validating json web tokens in c++
+Status: install ok installed
+

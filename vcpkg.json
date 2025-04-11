@@ -1,6 +1,8 @@
 {
   "dependencies": [
     "openssl",
-    "jwt-cpp"
+    "jwt-cpp",
+    "asio",
+    "crow"
   ]
 }
