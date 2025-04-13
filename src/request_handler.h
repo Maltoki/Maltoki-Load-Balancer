@@ -172,6 +172,70 @@ public:
         return json_body;
     }
 
+    crow::json::rvalue refresh_login(
+        const std::string& refresh_token
+    ) {
+
+        crow::json::wvalue client_packet;
+
+        client_packet["service"] = "refresh_login";
+        client_packet["data"] = crow::json::wvalue{
+            {"refresh_token", refresh_token}
+        };
+
+        crow::json::rvalue json_body = handle_auth_request(client_packet);
+
+        return json_body;
+    }
+
+    crow::json::rvalue refresh_access(
+        const std::string& refresh_token
+    ) {
+
+        crow::json::wvalue client_packet;
+
+        client_packet["service"] = "refresh_access";
+        client_packet["data"] = crow::json::wvalue{
+            {"refresh_token", refresh_token}
+        };
+
+        crow::json::rvalue json_body = handle_auth_request(client_packet);
+
+        return json_body;
+    }
+
+    crow::json::rvalue verify_account(
+        const std::string& access_token
+    ) {
+
+        crow::json::wvalue client_packet;
+
+        client_packet["service"] = "verify_account";
+        client_packet["data"] = crow::json::wvalue{
+            {"access_token", access_token}
+        };
+
+        crow::json::rvalue json_body = handle_auth_request(client_packet);
+
+        return json_body;
+    }
+
+    crow::json::rvalue generate_API_key(
+        const std::string& access_token
+    ) {
+
+        crow::json::wvalue client_packet;
+
+        client_packet["service"] = "generate_API_key";
+        client_packet["data"] = crow::json::wvalue{
+            {"access_token", access_token}
+        };
+
+        crow::json::rvalue json_body = handle_auth_request(client_packet);
+
+        return json_body;
+    }
+
     crow::json::rvalue handle_auth_request(crow::json::wvalue payload) {
         std::string json_str = payload.dump();
         request_body_type in_vec(json_str.begin(), json_str.end());

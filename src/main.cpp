@@ -8,6 +8,24 @@
 #include <cstring> // For memset()
 #include "request_handler.h"
 
+struct CORS {
+    struct context {}; // Required by Crow, even if empty
+
+    void before_handle(crow::request& req, crow::response& res, context&) {
+        // Handle preflight OPTIONS request globally
+        if (req.method == crow::HTTPMethod::Options) {
+            res.code = 204;
+            res.end();
+        }
+    }
+
+    void after_handle(crow::request&, crow::response& res, context&) {
+        res.add_header("Access-Control-Allow-Origin", "*");
+        res.add_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        res.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    }
+};
+
 int main(int argc, char* argv[]) {
     if (argc < 4) {
         std::cout << "Usage: ./server.exe key_file_path socket_server_port api_port\n";
@@ -27,7 +45,7 @@ int main(int argc, char* argv[]) {
     if (!request_handler->readKey(key_path))
         return 1;
 
-    crow::SimpleApp app;
+    crow::App<CORS> app;
 
     CROW_ROUTE(app, "/workload/<string>").methods(crow::HTTPMethod::Post)([request_handler](const crow::request& req, std::string client_type) {
         if (client_type == "Auth" || !request_handler->service_exists(client_type))
@@ -101,6 +119,58 @@ int main(int argc, char* argv[]) {
                 return crow::response(200, res_writer.dump());
             }
             return crow::response(401, "Missing required fields.");
+        }
+        else if (service == "refresh_login") {
+            crow::json::rvalue json_body = crow::json::load(req.body);
+            if (
+                json_body.has("refresh_token")
+                ) {
+                auto res = request_handler->refresh_login(json_body["refresh_token"].s());
+                if (res.has("success") && !res["success"].b())
+                    return crow::response(401, res.has("error") ? std::string(res["error"].s()) : "Login refresh failed.");
+                crow::json::wvalue res_writer = std::move(res);
+                return crow::response(200, res_writer.dump());
+            }
+            return crow::response(401, "Missing refresh token.");
+        }
+        else if (service == "refresh_access") {
+            crow::json::rvalue json_body = crow::json::load(req.body);
+            if (
+                json_body.has("refresh_token")
+                ) {
+                auto res = request_handler->refresh_access(json_body["refresh_token"].s());
+                if (res.has("success") && !res["success"].b())
+                    return crow::response(401, res.has("error") ? std::string(res["error"].s()) : "Access refresh failed.");
+                crow::json::wvalue res_writer = std::move(res);
+                return crow::response(200, res_writer.dump());
+            }
+            return crow::response(401, "Missing refresh token.");
+        }
+        else if (service == "verify_account") {
+            crow::json::rvalue json_body = crow::json::load(req.body);
+            if (
+                json_body.has("access_token")
+                ) {
+                auto res = request_handler->verify_account(json_body["access_token"].s());
+                if (res.has("success") && !res["success"].b())
+                    return crow::response(401, res.has("error") ? std::string(res["error"].s()) : "Account verification failed.");
+                crow::json::wvalue res_writer = std::move(res);
+                return crow::response(200, res_writer.dump());
+            }
+            return crow::response(401, "Missing access token.");
+        }
+        else if (service == "generate_API_key") {
+            crow::json::rvalue json_body = crow::json::load(req.body);
+            if (
+                json_body.has("access_token")
+                ) {
+                auto res = request_handler->generate_API_key(json_body["access_token"].s());
+                if (res.has("success") && !res["success"].b())
+                    return crow::response(401, res.has("error") ? std::string(res["error"].s()) : "API key generation failed.");
+                crow::json::wvalue res_writer = std::move(res);
+                return crow::response(200, res_writer.dump());
+            }
+            return crow::response(401, "Missing access token.");
         }
         return crow::response(404, "The requested auth service does not exist.");
     });
